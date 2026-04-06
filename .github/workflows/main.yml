@@ -1,0 +1,35 @@
+name: Run Velib ETL
+
+# Quand est-ce que le robot se réveille ?
+on:
+  push:
+    branches: [ main ]  # Dès que tu fais un 'git push'
+  schedule:
+    - cron: '0 * * * *' # Et aussi automatiquement toutes les heures
+
+jobs:
+  build_and_run:
+    runs-on: ubuntu-latest # Le robot utilise un ordinateur Linux gratuit fourni par GitHub
+    
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v3
+
+      - name: 🐍 Installation de Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Installation des bibliothèques
+        run: |
+          pip install -r requirements.txt
+
+      - name: 🚀 Lancement de l'ETL
+        # C'est ici qu'on fait le pont entre tes Secrets GitHub et ton code Python
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: python etl_velib.py
